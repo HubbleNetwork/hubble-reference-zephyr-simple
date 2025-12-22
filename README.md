@@ -44,7 +44,7 @@ High-level steps (see full workflow for details):
 1. Checks out the repository and installs small helper tools.
 2. Sets up Zephyr via the official `zephyrproject-rtos/action-zephyr-setup` action.
 3. If a `device_key` input is not provided, the workflow **registers** a device using the Hubble API endpoints (production or sandbox) and exports `HUBBLE_DEVICE_KEY`/`HUBBLE_DEVICE_ID`. The registration step requires valid org credentials (inputs or secrets).
-4. Builds the Zephyr application via `west build -p -b "$BOARD" . -- -DEXTRA_CPPFLAGS="-DTIME=$TIME_MS -DKEY=\"$HUBBLE_DEVICE_KEY\""` — **this embeds the device key** into the built binary in the same way the repository example does. See the security note below.
+4. Builds the Zephyr application via `west build -p -b "$BOARD" .` — **this embeds the device key** into the built binary in the same way the repository example does. See the security note below.
 5. Packages the `./build` directory into a password-protected ZIP using AES-256 and uploads the archive as a GitHub Actions artifact. The ZIP filename is of the form `<<sanitized-board>>-build-<run_id>.zip`, and the artifact name is `hubble-simple-app-<device-name>`.
 
 ### Running the workflow (GitHub UI)
@@ -147,16 +147,13 @@ These steps are the same high-level steps used by the workflow to prepare Zephyr
 
 5. Build the app (local device key example):
 
-The example application expects a device key to be available to the binary as the `KEY` macro. The workflow embeds the key by passing `-DEXTRA_CPPFLAGS` to west; replicate this locally as follows:
+The example application expects a device key to be available from the ```HUBBLE_DEVICE_KEY``` environment variable. If this is not set the key will default to ```1111111111111111111111111111111111111111111=```.
 
 ```bash
-# Example: embed a device key and the build TIME in milliseconds
-export HUBBLE_DEVICE_KEY="<your-device-key-here>"
+export HUBBLE_DEVICE_KEY=<your-device-key-here>
 
-# Build with west (replace BOARD with your board)
-BOARD=nrf52840dk/nrf52840
-TIME_MS=$(( $(date +%s) * 1000 ))
-west build -p -b "$BOARD" . -- -DEXTRA_CPPFLAGS="-DTIME=$TIME_MS -DHUBBLE_KEY=\"$HUBBLE_DEVICE_KEY\""
+# Build with west (replace <BOARD> with your board - e.g. nrf52840dk/nrf52840)
+west build -p -b <BOARD> .
 ```
 
 6. Flash (if you have a connected board):
@@ -165,38 +162,11 @@ west build -p -b "$BOARD" . -- -DEXTRA_CPPFLAGS="-DTIME=$TIME_MS -DHUBBLE_KEY=\"
 west flash
 ```
 
-> **Note:** The workflow embeds the device key into the binary with:
->
-> ```text
-> -DEXTRA_CPPFLAGS="-DTIME=$TIME_MS -DKEY=\"$HUBBLE_DEVICE_KEY\""
-> ```
->
-> which is the same approach shown above. That means any key you embed is compiled into the firmware — see the Security section below.
+> **Note:** The workflow embeds the device key into the binary. That means any key you embed is compiled into the firmware — see the Security section below.
 
 ### `prj.conf` and important build-time configuration
 
-This application uses a small `prj.conf` to enable the shell, Bluetooth and logging. The example `prj.conf` in this repository configures logging, Bluetooth peripheral role, power management, and defines the main stack size. You can find those settings in `prj.conf`. For reference the file contains entries such as:
-
-```ini
-# Reasonable SHELL configuration for this application
-CONFIG_SHELL=y
-
-# Logging
-CONFIG_LOG=y
-CONFIG_LOG_BACKEND_UART=y
-
-# Hubble Network
-CONFIG_HUBBLE_BLE_NETWORK=y
-
-# Bluetooth dependencies
-CONFIG_BT=y
-CONFIG_BT_PERIPHERAL=y
-
-CONFIG_MAIN_STACK_SIZE=2048
-```
-
-(See `prj.conf` for the complete configuration.)
-
+This application uses a small `prj.conf` to enable the shell, Bluetooth and logging. The example `prj.conf` in this repository configures logging, Bluetooth peripheral role, power management, and defines the main stack size. You can find those settings in `prj.conf`. 
 
 ## Hubble credentials and device registration
 

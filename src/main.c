@@ -20,6 +20,7 @@ LOG_MODULE_REGISTER(main, CONFIG_APP_LOG_LEVEL);
  * We will decode the HUBBLE_KEY_B64_STR config into this
  */
 static uint8_t master_key[CONFIG_HUBBLE_KEY_SIZE];
+static const char master_key_str[] = HUBBLE_KEY;
 
 #define ADV_UPDATE_PERIOD_S 300
 
@@ -77,12 +78,12 @@ K_TIMER_DEFINE(blink_timer, blink_timer_cb, NULL);
 
 static int decode_master_key(void)
 {
-	size_t keylen = b64_decoded_size(STR(HUBBLE_KEY));
+	size_t keylen = b64_decoded_size(master_key_str);
 	if (keylen != sizeof(master_key)) {
 		LOG_ERR("Given key incorrect size (%d bytes)", keylen);
 		return -1;
 	}
-	int ret = b64_decode(STR(HUBBLE_KEY), master_key, sizeof(master_key));
+	int ret = b64_decode(master_key_str, master_key, sizeof(master_key));
 	if (ret != 0) {
 		LOG_ERR("Failed to decode given key");
 		return ret;

@@ -172,9 +172,7 @@ jobs:
           BOARD: ${{ github.event.inputs.board }}
         run: |
           set -euxo pipefail
-          TIME_MS=$(( $(date +%s) * 1000 ))
-          west build -p -b "$BOARD" . -- \
-            -DEXTRA_CPPFLAGS="-DTIME=$TIME_MS -DHUBBLE_KEY=\"$HUBBLE_DEVICE_KEY\""
+          west build -p -b "$BOARD" .
 
       - name: Sanitize board name
         id: sanitize-board-name
