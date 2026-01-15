@@ -15,8 +15,8 @@ manifest:
       revision: main
       import: true
       west-commands: scripts/west-commands.yml
-    - name: hubblenetwork-sdk
-      repo-path: sdk
-      revision: main
-      path: modules/lib/hubblenetwork-sdk
+    - name: hubble-device-sdk
+      repo-path: hubble-device-sdk
+      revision: v1.0.0
+      path: modules/lib/hubble-device-sdk
       remote: hubble
