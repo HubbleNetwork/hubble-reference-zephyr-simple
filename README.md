@@ -1,5 +1,7 @@
 # Hubble Simple Application Reference for Zephyr
 
+[![SDK main canary](https://github.com/HubbleNetwork/hubble-reference-zephyr-simple/actions/workflows/sdk-main-canary.yml/badge.svg)](https://github.com/HubbleNetwork/hubble-reference-zephyr-simple/actions/workflows/sdk-main-canary.yml)
+
 This repository is a minimal Zephyr application that demonstrates the Hubble BLE advertisement flow used by Hubble devices. It includes a GitHub Actions workflow that can build the application for a target board and produce a password-protected archive containing the built artifacts. You can either:
 
 * Use the **GitHub Actions** `Build Application` workflow to generate password-protected binaries via a manual `workflow_dispatch` run (recommended for non-developers), or

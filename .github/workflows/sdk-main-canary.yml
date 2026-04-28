@@ -1,0 +1,41 @@
+name: SDK main canary
+
+on:
+  schedule:
+    # 06:00 UTC daily.
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  build-against-sdk-main:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # action-zephyr-setup runs `west init -l` + `west update`, which
+      # honors west.yml. With revision: main on hubble-device-sdk, this
+      # checks out the current tip of HubbleNetwork/hubble-device-sdk@main.
+      - name: Setup Zephyr workspace
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: .
+          toolchains: arm-zephyr-eabi
+
+      - name: Show resolved SDK revision
+        working-directory: modules/lib/hubble-device-sdk
+        run: git --no-pager log -1 --oneline
+
+      - name: Build application (default test key)
+        env:
+          BOARD: nrf52840dk/nrf52840
+          # HUBBLE_DEVICE_KEY intentionally unset: CMakeLists.txt falls
+          # back to the built-in test key. We're verifying the build,
+          # not registering a device.
+        run: |
+          set -euxo pipefail
+          west build -p -b "$BOARD" .
